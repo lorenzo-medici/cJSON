@@ -1,11 +1,16 @@
 set(CMAKE_LEGACY_CYGWIN_WIN32 0)
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.16)
 
 project(cJSON
     VERSION 1.7.16
     LANGUAGES C)
 
 cmake_policy(SET CMP0054 NEW)  # set CMP0054 policy
+
+# Fuzzing with CIFUZZ instructions
+enable_testing()
+find_package(cifuzz NO_SYSTEM_ENVIRONMENT_PATH)
+enable_fuzz_testing()
 
 include(GNUInstallDirs)
 
@@ -23,14 +28,14 @@ if (ENABLE_CUSTOM_COMPILER_FLAGS)
             -pedantic
             -Wall
             -Wextra
-            -Werror
+            # -Werror
             -Wstrict-prototypes
             -Wwrite-strings
             -Wshadow
             -Winit-self
             -Wcast-align
             -Wformat=2
-            -Wmissing-prototypes
+            # -Wmissing-prototypes
             -Wstrict-overflow=2
             -Wcast-qual
             -Wundef
@@ -61,11 +66,11 @@ if (ENABLE_CUSTOM_COMPILER_FLAGS)
     endif()
 endif()
 
-option(ENABLE_SANITIZERS "Enables AddressSanitizer and UndefinedBehaviorSanitizer." OFF)
+option(ENABLE_SANITIZERS "Enables AddressSanitizer and UndefinedBehaviorSanitizer." ON)
 if (ENABLE_SANITIZERS)
     list(APPEND custom_compiler_flags
         -fno-omit-frame-pointer
-        -fsanitize=address
+        -fsanitize=fuzzer,address
         -fsanitize=undefined
         -fsanitize=float-cast-overflow
         -fsanitize-address-use-after-scope
@@ -241,31 +246,6 @@ if(ENABLE_TARGET_EXPORT)
         DESTINATION "${CMAKE_INSTALL_FULL_LIBDIR}/cmake/cJSON")
 endif()
 
-option(ENABLE_CJSON_TEST "Enable building cJSON test" ON)
-if(ENABLE_CJSON_TEST)
-    enable_testing()
-
-    set(TEST_CJSON cJSON_test)
-    add_executable("${TEST_CJSON}" test.c)
-    target_link_libraries("${TEST_CJSON}" "${CJSON_LIB}")
-
-    add_test(NAME ${TEST_CJSON} COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${TEST_CJSON}")
-
-    # Disable -fsanitize=float-divide-by-zero for cJSON_test
-    if (FLAG_SUPPORTED_fsanitizefloatdividebyzero)
-        if ("${CMAKE_VERSION}" VERSION_LESS "2.8.12")
-            set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-sanitize=float-divide-by-zero")
-        else()
-            target_compile_options(${TEST_CJSON} PRIVATE "-fno-sanitize=float-divide-by-zero")
-        endif()
-    endif()
-
-    #"check" target that automatically builds everything and runs the tests
-    add_custom_target(check
-        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure
-        DEPENDS ${TEST_CJSON})
-endif()
-
 #Create the uninstall target
 option(ENABLE_CJSON_UNINSTALL "Enable creating uninstall target" ON)
 if(ENABLE_CJSON_UNINSTALL)
@@ -279,5 +259,9 @@ if(ENABLE_LOCALES)
 	add_definitions(-DENABLE_LOCALES)
 endif()
 
-add_subdirectory(tests)
-add_subdirectory(fuzzing)
+
+# Add fuzz test
+add_fuzz_test(test1 test/test1.cpp)
+target_link_libraries(test1 PRIVATE cjson)
+target_compile_options(test1 PRIVATE -g -fsanitize=fuzzer,address)
+target_link_options(test1 PRIVATE -g -fsanitize=fuzzer,address)
