@@ -29,7 +29,7 @@ if (ENABLE_CUSTOM_COMPILER_FLAGS)
             -Wall
             -Wextra
             # -Werror
-            -Wstrict-prototypes
+            # -Wstrict-prototypes
             -Wwrite-strings
             -Wshadow
             -Winit-self

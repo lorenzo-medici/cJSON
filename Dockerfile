@@ -21,4 +21,4 @@ COPY . .
 
 RUN ls -a
 
-CMD ["sh", "-c", "cifuzz run test1 --use-sandbox=false > /cJSON/fuzzing.log 2>&1 ; cat /cJSON/fuzzing.log"]
+CMD ["bash", "./run_tests.sh"]
