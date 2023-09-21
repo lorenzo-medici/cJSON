@@ -3,10 +3,10 @@ on:
   pull_request:
     types: [opened, reopened]
     branches:
-    - 'main'
+    - 'master'
   push:
     branches:
-      - 'main'
+      - 'master'
 jobs:
   build-docker-image:
     name: Build docker image
