@@ -7,7 +7,7 @@ WORKDIR /cJSON
 
 # update dependencies for cifuzz
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl clang cmake llvm lcov python3.10 openjdk-11-jdk zip && \
+    apt-get install -y --no-install-recommends curl make clang cmake llvm lcov python3.10 openjdk-11-jdk zip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
