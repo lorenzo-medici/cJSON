@@ -7,7 +7,7 @@ WORKDIR /cJSON
 
 # update dependencies for cifuzz
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends clang llvm lcov python jdk-openjdk zip && \
+    apt-get install -y --no-install-recommends curl clang cmake llvm lcov python3.10 openjdk-11-jdk zip && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -21,4 +21,4 @@ COPY . .
 
 RUN ls -a
 
-CMD ["sh", "-c", "cifuzz run test1 --use-sandbox=false > /cJSON/fuzzing.log 2>&1 && cat /cJSON/fuzzing.log"]
+CMD ["sh", "-c", "cifuzz run test1 --use-sandbox=false > /cJSON/fuzzing.log 2>&1 ; cat /cJSON/fuzzing.log"]

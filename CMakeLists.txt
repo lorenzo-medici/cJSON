@@ -259,7 +259,6 @@ if(ENABLE_LOCALES)
 	add_definitions(-DENABLE_LOCALES)
 endif()
 
-
 # Add fuzz test
 add_fuzz_test(test1 test/test1.cpp)
 target_link_libraries(test1 PRIVATE cjson)
